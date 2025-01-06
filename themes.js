@@ -44,3 +44,5 @@ const themes = {
         black: '#bf360c'
     }
 };
+
+window.themes = themes;

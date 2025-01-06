@@ -2,36 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pretty Chess</title>
+    <title>Pretty Board Games</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="game-container">
         <div class="settings-panel">
-            <div class="controls">
-                <div class="setting">
-                    <label for="pieceSize">Piece Size:</label>
-                    <input type="range" id="pieceSize" min="0.9" max="4.5" step="0.1" value="0.9">
-                    <span class="size-value">0.9x</span>
-                </div>
-                <div class="setting">
-                    <label for="theme">Theme:</label>
-                    <select id="theme">
-                        <option value="classic">Classic Dark</option>
-                        <option value="forest">Forest Green</option>
-                        <option value="ocean">Deep Ocean</option>
-                        <option value="desert">Desert Sand</option>
-                    </select>
-                </div>
-            </div>
-            <button id="resetGame" class="reset-button">New Game</button>
+            <label>
+                Piece Size:
+                <input type="range" id="pieceSize" min="0.5" max="1.0" step="0.1" value="0.9">
+                <span id="pieceSizeValue">0.9x</span>
+            </label>
+            <label>
+                Theme:
+                <select id="theme">
+                    <option value="classic">Classic Dark</option>
+                    <option value="forest" selected>Forest Green</option>
+                    <option value="ocean">Deep Ocean</option>
+                    <option value="desert">Desert Sand</option>
+                </select>
+            </label>
+            <label>
+                Game:
+                <select id="gameType">
+                    <option value="chess">Chess</option>
+                    <option value="checkers">Checkers</option>
+                </select>
+            </label>
+            <button id="resetGame">New Game</button>
         </div>
         <div class="board-container">
-            <svg id="chessboard" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet"></svg>
+            <svg id="chessboard" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
+                <!-- Board will be created by JavaScript -->
+            </svg>
         </div>
     </div>
     <script src="themes.js"></script>
     <script src="chess.js"></script>
+    <script src="checkers.js"></script>
+    <script>
+        let currentGame;
+        
+        function initGame(gameType) {
+            if (currentGame) {
+                // Clean up existing game
+                const board = document.getElementById('chessboard');
+                while (board.firstChild) {
+                    board.removeChild(board.firstChild);
+                }
+            }
+            
+            // Initialize new game
+            currentGame = gameType === 'checkers' ? new Checkers() : new Chess();
+        }
+        
+        window.addEventListener('load', () => {
+            const gameSelect = document.getElementById('gameType');
+            gameSelect.addEventListener('change', (e) => {
+                initGame(e.target.value);
+            });
+            
+            // Initialize default game (Chess)
+            initGame('chess');
+        });
+    </script>
 </body>
 </html>

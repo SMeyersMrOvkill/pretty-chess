@@ -324,29 +324,6 @@ class Chess {
     }
 }
 
-const themes = {
-    classic: {
-        light: '#ecf0f1',
-        dark: '#95a5a6',
-        selected: '#3498db',
-        validMove: '#2ecc71',
-        lastMove: '#e74c3c',
-        white: '#ffffff',
-        black: '#2c3e50',
-        background: '#f0f0f0'
-    },
-    dark: {
-        light: '#2c3e50',
-        dark: '#1a252f',
-        selected: '#3498db',
-        validMove: '#2ecc71',
-        lastMove: '#e74c3c',
-        white: '#ffffff',
-        black: '#2c3e50',
-        background: '#1a252f'
-    }
-};
-
 // Initialize the game when the page loads
 window.addEventListener('load', () => {
     new Chess();
