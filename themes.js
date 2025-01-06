@@ -1,58 +1,103 @@
 const themes = {
-    classic: {
-        name: 'Classic Dark',
-        light: '#ecf0f1',
-        dark: '#95a5a6',
-        selected: '#3498db',
-        validMove: '#2ecc71',
-        lastMove: '#e74c3c',
-        background: '#2c3e50',
-        white: '#ffffff',
-        black: '#2c3e50'
+    'Forest Green': {
+        light: '#E8F3E8',
+        dark: '#769656',
+        highlight: {
+            base: 'rgba(255, 255, 0, 0.15)',
+            stroke: '#FFFFFF',
+            shadow: '0 0 10px rgba(255, 255, 255, 0.5)'
+        },
+        validMove: {
+            base: 'rgba(255, 255, 255, 0.2)',
+            stroke: '#FFFFFF',
+            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+        },
+        pieces: {
+            white: '#FFFFFF',
+            black: '#000000',
+            whiteShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
+            blackShadow: '0 0 5px rgba(255, 255, 255, 0.3)'
+        }
     },
-    forest: {
-        name: 'Forest Green',
-        light: '#c8e6c9',
-        dark: '#81c784',
-        selected: '#4caf50',
-        validMove: '#a5d6a7',
-        lastMove: '#ef5350',
-        background: '#2e7d32',
-        white: '#f5f5f5',
-        black: '#1b5e20'
+    'Classic Brown': {
+        light: '#f0d9b5',
+        dark: '#b58863',
+        highlight: {
+            base: 'rgba(255, 255, 0, 0.15)',
+            stroke: '#000000',
+            shadow: '0 0 10px rgba(0, 0, 0, 0.5)'
+        },
+        validMove: {
+            base: 'rgba(0, 0, 0, 0.15)',
+            stroke: '#000000',
+            shadow: '0 0 8px rgba(0, 0, 0, 0.3)'
+        },
+        pieces: {
+            white: '#FFFFFF',
+            black: '#000000',
+            whiteShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
+            blackShadow: '0 0 5px rgba(255, 255, 255, 0.3)'
+        }
     },
-    highContrast: {
-        name: 'High Contrast',
-        light: '#ffffff',
-        dark: '#2c3e50',
-        selected: '#f1c40f',
-        validMove: '#2ecc71',
-        lastMove: '#e74c3c',
-        background: '#34495e',
-        white: '#ffffff',
-        black: '#000000'
+    'High Contrast': {
+        light: '#FFFFFF',
+        dark: '#000000',
+        highlight: {
+            base: 'rgba(255, 255, 0, 0.3)',
+            stroke: '#FFD700',
+            shadow: '0 0 10px rgba(255, 215, 0, 0.8)'
+        },
+        validMove: {
+            base: 'rgba(0, 255, 0, 0.2)',
+            stroke: '#00FF00',
+            shadow: '0 0 8px rgba(0, 255, 0, 0.6)'
+        },
+        pieces: {
+            white: '#FFFFFF',
+            black: '#000000',
+            whiteShadow: '0 0 5px rgba(0, 0, 0, 0.5)',
+            blackShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+        }
     },
-    ocean: {
-        name: 'Deep Ocean',
-        light: '#b3e0ff',
-        dark: '#4fc3f7',
-        selected: '#0288d1',
-        validMove: '#81d4fa',
-        lastMove: '#ff8a80',
-        background: '#01579b',
-        white: '#e1f5fe',
-        black: '#01579b'
+    'Ocean Blue': {
+        light: '#E8F3FF',
+        dark: '#4682B4',
+        highlight: {
+            base: 'rgba(255, 255, 255, 0.2)',
+            stroke: '#FFFFFF',
+            shadow: '0 0 10px rgba(255, 255, 255, 0.6)'
+        },
+        validMove: {
+            base: 'rgba(255, 255, 255, 0.15)',
+            stroke: '#FFFFFF',
+            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+        },
+        pieces: {
+            white: '#FFFFFF',
+            black: '#000000',
+            whiteShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
+            blackShadow: '0 0 5px rgba(255, 255, 255, 0.3)'
+        }
     },
-    desert: {
-        name: 'Desert Sand',
-        light: '#fff3e0',
-        dark: '#ffe0b2',
-        selected: '#fb8c00',
-        validMove: '#ffcc80',
-        lastMove: '#ff7043',
-        background: '#e65100',
-        white: '#fff3e0',
-        black: '#bf360c'
+    'Twilight': {
+        light: '#E8E8E8',
+        dark: '#4A4A4A',
+        highlight: {
+            base: 'rgba(147, 112, 219, 0.2)',
+            stroke: '#9370DB',
+            shadow: '0 0 10px rgba(147, 112, 219, 0.6)'
+        },
+        validMove: {
+            base: 'rgba(255, 255, 255, 0.15)',
+            stroke: '#FFFFFF',
+            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+        },
+        pieces: {
+            white: '#FFFFFF',
+            black: '#000000',
+            whiteShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
+            blackShadow: '0 0 5px rgba(255, 255, 255, 0.3)'
+        }
     }
 };
 

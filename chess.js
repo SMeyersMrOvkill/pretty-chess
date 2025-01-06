@@ -247,34 +247,37 @@ class Chess {
     }
 
     showValidMoves(piece) {
-        const type = piece.dataset.type;
-        const row = parseInt(piece.dataset.row);
-        const col = parseInt(piece.dataset.col);
+        const currentPoint = piece.getAttribute('data-point');
+        const validMoves = this.getValidMoves(currentPoint);
         
-        // Clear previous highlights
-        this.squares.forEach(square => {
-            square.setAttribute('fill', (parseInt(square.dataset.row) + parseInt(square.dataset.col)) % 2 === 0 
-                ? this.colors.light : this.colors.dark);
-        });
-        
-        if (type === 'knight') {
-            const moves = [
-                {row: row-2, col: col+1}, {row: row-2, col: col-1},
-                {row: row+2, col: col+1}, {row: row+2, col: col-1},
-                {row: row-1, col: col+2}, {row: row-1, col: col-2},
-                {row: row+1, col: col+2}, {row: row+1, col: col-2}
-            ];
+        validMoves.forEach(point => {
+            // Create highlight group
+            const highlightGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            highlightGroup.classList.add('move-highlight');
             
-            moves.forEach(move => {
-                if (move.row >= 0 && move.row < 8 && move.col >= 0 && move.col < 8) {
-                    const targetPiece = this.boardState[move.row][move.col];
-                    if (!targetPiece || targetPiece.dataset.color !== piece.dataset.color) {
-                        const square = this.squares[move.row * 8 + move.col];
-                        square.setAttribute('fill', this.colors.validMove);
-                    }
-                }
-            });
-        }
+            // Base circle (filled)
+            const baseCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            const coords = this.getSquareCenter(point);
+            baseCircle.setAttribute('cx', coords.x);
+            baseCircle.setAttribute('cy', coords.y);
+            baseCircle.setAttribute('r', '20');
+            baseCircle.setAttribute('fill', this.colors.validMove.base);
+            baseCircle.setAttribute('filter', `drop-shadow(${this.colors.validMove.shadow})`);
+            
+            // Animated stroke circle
+            const strokeCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            strokeCircle.setAttribute('cx', coords.x);
+            strokeCircle.setAttribute('cy', coords.y);
+            strokeCircle.setAttribute('r', '22');
+            strokeCircle.setAttribute('stroke', this.colors.validMove.stroke);
+            strokeCircle.setAttribute('stroke-width', '2');
+            strokeCircle.setAttribute('fill', 'none');
+            strokeCircle.classList.add('valid-move-highlight');
+            
+            highlightGroup.appendChild(baseCircle);
+            highlightGroup.appendChild(strokeCircle);
+            this.board.appendChild(highlightGroup);
+        });
     }
 
     setupEventListeners() {
