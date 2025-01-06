@@ -1,65 +1,97 @@
-class ChessGame {
+class Chess {
     constructor() {
         this.board = document.getElementById('chessboard');
         this.squares = [];
         this.pieces = [];
         this.selectedPiece = null;
-        this.colors = {
-            light: '#ecf0f1',
-            dark: '#95a5a6',
-            selected: '#3498db',
-            validMove: '#2ecc71',
-            lastMove: '#e74c3c'
-        };
+        this.currentTheme = themes.classic;
+        this.colors = { ...this.currentTheme };
         this.pieceColors = {
-            white: '#ffffff',
-            black: '#2c3e50'
+            white: this.currentTheme.white,
+            black: this.currentTheme.black
         };
         this.currentTurn = 'white';
         this.boardState = Array(8).fill().map(() => Array(8).fill(null));
         this.pieceSize = 0.9;
-        this.init();
+        
+        // Create groups for board and pieces
+        this.boardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.boardGroup.setAttribute('class', 'board-squares');
+        this.pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        this.pieceGroup.setAttribute('class', 'pieces');
+        
+        this.board.appendChild(this.boardGroup);
+        this.board.appendChild(this.pieceGroup);
+        
+        // Initialize the game
+        this.createBoard();
+        this.setupPieces();
         this.initSettings();
+        this.updateTheme('classic');
+        
+        // Add click handler for the board
+        this.board.addEventListener('click', this.handleClick.bind(this));
     }
 
     init() {
         this.createBoard();
-        this.createPieces();
-        this.setupEventListeners();
+        this.setupPieces();
     }
 
     initSettings() {
-        const sizeSlider = document.getElementById('pieceSize');
-        const sizeValue = document.querySelector('.size-value');
-        const resetButton = document.getElementById('resetGame');
-        
-        sizeSlider.addEventListener('input', (e) => {
-            this.pieceSize = parseFloat(e.target.value);
-            sizeValue.textContent = this.pieceSize.toFixed(1) + 'x';
-            this.updateAllPieceSizes();
+        const themeSelect = document.getElementById('theme');
+        const pieceSize = document.getElementById('pieceSize');
+        const resetGame = document.getElementById('resetGame');
+
+        themeSelect.addEventListener('change', (e) => {
+            const selectedTheme = e.target.value;
+            if (themes[selectedTheme]) {
+                this.updateTheme(selectedTheme);
+            }
         });
 
-        resetButton.addEventListener('click', () => {
-            // Remove all pieces
-            this.pieces.forEach(piece => piece.remove());
-            this.pieces = [];
-            this.selectedPiece = null;
-            this.currentTurn = 'white';
-            this.boardState = Array(8).fill().map(() => Array(8).fill(null));
-            
-            // Reset board colors
-            this.squares.forEach(square => {
-                const row = parseInt(square.dataset.row);
-                const col = parseInt(square.dataset.col);
-                square.setAttribute('fill', (row + col) % 2 === 0 ? this.colors.light : this.colors.dark);
-            });
+        pieceSize.addEventListener('input', (e) => {
+            this.pieceSize = parseFloat(e.target.value);
+            this.updatePieceSizes();
+        });
 
-            // Setup new pieces
-            this.createPieces();
+        resetGame.addEventListener('click', () => {
+            this.resetGame();
         });
     }
 
-    updateAllPieceSizes() {
+    updateTheme(themeName) {
+        if (!themes[themeName]) return;
+        
+        this.currentTheme = themes[themeName];
+        this.colors = { ...this.currentTheme };
+        this.pieceColors = {
+            white: this.currentTheme.white,
+            black: this.currentTheme.black
+        };
+        
+        document.body.style.backgroundColor = this.currentTheme.background;
+        
+        // Update square colors
+        this.squares.forEach((square, index) => {
+            const row = Math.floor(index / 8);
+            const col = index % 8;
+            const isLight = (row + col) % 2 === 0;
+            square.setAttribute('fill', isLight ? this.colors.light : this.colors.dark);
+        });
+
+        // Update piece colors
+        this.pieces.forEach(piece => {
+            const path = piece.querySelector('path');
+            if (path) {
+                path.setAttribute('fill', this.pieceColors[piece.dataset.color]);
+                path.setAttribute('stroke', piece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
+                path.setAttribute('stroke-width', '2');
+            }
+        });
+    }
+
+    updatePieceSizes() {
         this.pieces.forEach(piece => {
             const path = piece.querySelector('path');
             const type = piece.dataset.type;
@@ -87,6 +119,13 @@ class ChessGame {
     }
 
     createBoard() {
+        // Clear existing squares
+        while (this.boardGroup.firstChild) {
+            this.boardGroup.removeChild(this.boardGroup.firstChild);
+        }
+        this.squares = [];
+
+        // Create squares
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
                 const square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -101,29 +140,43 @@ class ChessGame {
                 square.dataset.row = row;
                 square.dataset.col = col;
                 
-                this.board.appendChild(square);
+                this.boardGroup.appendChild(square);
                 this.squares.push(square);
+                
+                // Store in board state
+                this.boardState[row][col] = null;
             }
         }
     }
 
-    createPieces() {
-        const pieceTypes = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
-        
-        // Create pawns
-        for (let col = 0; col < 8; col++) {
-            this.createPiece('pawn', 1, col, 'black');
-            this.createPiece('pawn', 6, col, 'white');
+    setupPieces() {
+        const layout = [
+            ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'],
+            ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn']
+        ];
+
+        // Clear existing pieces
+        while (this.pieceGroup.firstChild) {
+            this.pieceGroup.removeChild(this.pieceGroup.firstChild);
+        }
+        this.pieces = [];
+
+        // Setup black pieces
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 8; col++) {
+                this.createPiece(layout[row][col], 'black', row, col);
+            }
         }
 
-        // Create other pieces
-        for (let col = 0; col < 8; col++) {
-            this.createPiece(pieceTypes[col], 0, col, 'black');
-            this.createPiece(pieceTypes[col], 7, col, 'white');
+        // Setup white pieces
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 8; col++) {
+                this.createPiece(layout[row][col], 'white', 7 - row, col);
+            }
         }
     }
 
-    createPiece(type, row, col, color) {
+    createPiece(type, color, row, col) {
         const piece = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         piece.setAttribute('class', 'piece');
         piece.dataset.type = type;
@@ -133,7 +186,7 @@ class ChessGame {
 
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('fill', this.pieceColors[color]);
-        path.setAttribute('stroke', '#2c3e50');
+        path.setAttribute('stroke', color === 'white' ? '#2c3e50' : '#ffffff');
         path.setAttribute('stroke-width', '2');
         path.setAttribute('d', this.getPiecePath(type));
 
@@ -145,8 +198,9 @@ class ChessGame {
         );
 
         piece.appendChild(path);
-        this.board.appendChild(piece);
+        this.pieceGroup.appendChild(piece);
         this.pieces.push(piece);
+        this.boardState[row][col] = piece;
     }
 
     getPiecePath(type) {
@@ -167,7 +221,8 @@ class ChessGame {
             const piece = e.target.closest('.piece');
             if (piece) {
                 if (this.selectedPiece) {
-                    this.selectedPiece.querySelector('path').setAttribute('stroke', '#2c3e50');
+                    const path = this.selectedPiece.querySelector('path');
+                    path.setAttribute('stroke', this.selectedPiece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
                 }
                 
                 if (this.selectedPiece !== piece) {
@@ -182,7 +237,7 @@ class ChessGame {
                     const row = parseInt(square.dataset.row);
                     const col = parseInt(square.dataset.col);
                     this.movePiece(this.selectedPiece, row, col);
-                    this.selectedPiece.querySelector('path').setAttribute('stroke', '#2c3e50');
+                    this.selectedPiece.querySelector('path').setAttribute('stroke', this.selectedPiece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
                     this.selectedPiece = null;
                 }
             }
@@ -200,10 +255,99 @@ class ChessGame {
         );
         piece.dataset.row = row;
         piece.dataset.col = col;
+        this.boardState[row][col] = piece;
+    }
+
+    resetGame() {
+        // Remove all pieces
+        this.pieces.forEach(piece => piece.remove());
+        this.pieces = [];
+        this.selectedPiece = null;
+        this.currentTurn = 'white';
+        this.boardState = Array(8).fill().map(() => Array(8).fill(null));
+        
+        // Reset board colors
+        this.updateTheme(this.currentTheme);
+
+        // Setup new pieces
+        this.setupPieces();
+    }
+
+    handleClick(event) {
+        const target = event.target;
+        
+        // Handle piece selection
+        if (target.closest('.piece')) {
+            const piece = target.closest('.piece');
+            const pieceColor = piece.dataset.color;
+            
+            // Only allow selecting pieces of current turn
+            if (pieceColor === this.currentTurn) {
+                if (this.selectedPiece) {
+                    // Deselect currently selected piece
+                    const path = this.selectedPiece.querySelector('path');
+                    path.setAttribute('stroke', this.selectedPiece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
+                    path.setAttribute('stroke-width', '2');
+                }
+                
+                if (this.selectedPiece !== piece) {
+                    // Select new piece
+                    this.selectedPiece = piece;
+                    const path = piece.querySelector('path');
+                    path.setAttribute('stroke', this.colors.selected);
+                    path.setAttribute('stroke-width', '3');
+                } else {
+                    // Deselect if clicking same piece
+                    this.selectedPiece = null;
+                }
+            }
+        }
+        // Handle square selection for move
+        else if (target.closest('.square') && this.selectedPiece) {
+            const square = target.closest('.square');
+            const row = parseInt(square.dataset.row);
+            const col = parseInt(square.dataset.col);
+            
+            // Check if move is valid (you can add more complex validation later)
+            const targetPiece = this.boardState[row][col];
+            if (!targetPiece || targetPiece.dataset.color !== this.currentTurn) {
+                this.movePiece(this.selectedPiece, row, col);
+                // Reset selection
+                const path = this.selectedPiece.querySelector('path');
+                path.setAttribute('stroke', this.selectedPiece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
+                path.setAttribute('stroke-width', '2');
+                this.selectedPiece = null;
+                // Switch turns
+                this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
+            }
+        }
     }
 }
 
+const themes = {
+    classic: {
+        light: '#ecf0f1',
+        dark: '#95a5a6',
+        selected: '#3498db',
+        validMove: '#2ecc71',
+        lastMove: '#e74c3c',
+        white: '#ffffff',
+        black: '#2c3e50',
+        background: '#f0f0f0'
+    },
+    dark: {
+        light: '#2c3e50',
+        dark: '#1a252f',
+        selected: '#3498db',
+        validMove: '#2ecc71',
+        lastMove: '#e74c3c',
+        white: '#ffffff',
+        black: '#2c3e50',
+        background: '#1a252f'
+    }
+};
+
 // Initialize the game when the page loads
 window.addEventListener('load', () => {
-    new ChessGame();
+    new Chess();
 });
