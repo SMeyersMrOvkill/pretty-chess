@@ -21,6 +21,17 @@ const themes = {
         white: '#f5f5f5',
         black: '#1b5e20'
     },
+    highContrast: {
+        name: 'High Contrast',
+        light: '#ffffff',
+        dark: '#2c3e50',
+        selected: '#f1c40f',
+        validMove: '#2ecc71',
+        lastMove: '#e74c3c',
+        background: '#34495e',
+        white: '#ffffff',
+        black: '#000000'
+    },
     ocean: {
         name: 'Deep Ocean',
         light: '#b3e0ff',

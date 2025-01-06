@@ -86,6 +86,12 @@ body {
     z-index: 30;
 }
 
+.coordinates text {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    user-select: none;
+}
+
 .settings-panel {
     position: absolute;
     top: 20px;

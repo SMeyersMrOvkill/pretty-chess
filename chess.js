@@ -125,6 +125,34 @@ class Chess {
         }
         this.squares = [];
 
+        // Create coordinate labels
+        const labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        labelGroup.setAttribute('class', 'coordinates');
+        
+        // Files (a-h)
+        for (let i = 0; i < 8; i++) {
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.textContent = String.fromCharCode(97 + i); // 'a' starts at 97
+            label.setAttribute('x', i * 100 + 50);
+            label.setAttribute('y', 790);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('fill', this.colors.light);
+            label.setAttribute('font-size', '20');
+            labelGroup.appendChild(label);
+        }
+        
+        // Ranks (1-8)
+        for (let i = 0; i < 8; i++) {
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.textContent = 8 - i;
+            label.setAttribute('x', 10);
+            label.setAttribute('y', i * 100 + 50);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('fill', this.colors.light);
+            label.setAttribute('font-size', '20');
+            labelGroup.appendChild(label);
+        }
+
         // Create squares
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
@@ -147,6 +175,8 @@ class Chess {
                 this.boardState[row][col] = null;
             }
         }
+        
+        this.board.appendChild(labelGroup);
     }
 
     setupPieces() {
@@ -214,6 +244,37 @@ class Chess {
             king: 'M22.5 11.63V6M20 8h5v5h-5zm-2.5 14.87c.54-1.77 2.17-3.02 4-3.02 1.83 0 3.46 1.25 4 3.02M15 21h15m-7.5 4L22 14h1.5l-.5 11M9 26c8.5-1.5 21-1.5 27 0l2-12H7l2 12zM9 26c0 2 1.5 2 2.5 4 1 1.5 1 1 .5 3.5-1.5 1-1.5 2.5-1.5 2.5-1.5 1.5.5 2.5.5 2.5 6.5 1 16.5 1 23 0 0 0 1.5-1 0-2.5 0 0 .5-1.5-1-2.5-.5-2.5-.5-2 .5-3.5 1-2 2.5-2 2.5-4'
         };
         return paths[type];
+    }
+
+    showValidMoves(piece) {
+        const type = piece.dataset.type;
+        const row = parseInt(piece.dataset.row);
+        const col = parseInt(piece.dataset.col);
+        
+        // Clear previous highlights
+        this.squares.forEach(square => {
+            square.setAttribute('fill', (parseInt(square.dataset.row) + parseInt(square.dataset.col)) % 2 === 0 
+                ? this.colors.light : this.colors.dark);
+        });
+        
+        if (type === 'knight') {
+            const moves = [
+                {row: row-2, col: col+1}, {row: row-2, col: col-1},
+                {row: row+2, col: col+1}, {row: row+2, col: col-1},
+                {row: row-1, col: col+2}, {row: row-1, col: col-2},
+                {row: row+1, col: col+2}, {row: row+1, col: col-2}
+            ];
+            
+            moves.forEach(move => {
+                if (move.row >= 0 && move.row < 8 && move.col >= 0 && move.col < 8) {
+                    const targetPiece = this.boardState[move.row][move.col];
+                    if (!targetPiece || targetPiece.dataset.color !== piece.dataset.color) {
+                        const square = this.squares[move.row * 8 + move.col];
+                        square.setAttribute('fill', this.colors.validMove);
+                    }
+                }
+            });
+        }
     }
 
     setupEventListeners() {
@@ -296,27 +357,36 @@ class Chess {
                     const path = piece.querySelector('path');
                     path.setAttribute('stroke', this.colors.selected);
                     path.setAttribute('stroke-width', '3');
+                    this.showValidMoves(piece);
                 } else {
                     // Deselect if clicking same piece
                     this.selectedPiece = null;
+                    // Reset square colors
+                    this.squares.forEach(square => {
+                        square.setAttribute('fill', (parseInt(square.dataset.row) + parseInt(square.dataset.col)) % 2 === 0 
+                            ? this.colors.light : this.colors.dark);
+                    });
                 }
             }
         }
         // Handle square selection for move
         else if (target.closest('.square') && this.selectedPiece) {
             const square = target.closest('.square');
-            const row = parseInt(square.dataset.row);
-            const col = parseInt(square.dataset.col);
+            const targetRow = parseInt(square.dataset.row);
+            const targetCol = parseInt(square.dataset.col);
             
-            // Check if move is valid (you can add more complex validation later)
-            const targetPiece = this.boardState[row][col];
-            if (!targetPiece || targetPiece.dataset.color !== this.currentTurn) {
-                this.movePiece(this.selectedPiece, row, col);
+            if (square.getAttribute('fill') === this.colors.validMove) {
+                this.movePiece(this.selectedPiece, targetRow, targetCol);
                 // Reset selection
                 const path = this.selectedPiece.querySelector('path');
                 path.setAttribute('stroke', this.selectedPiece.dataset.color === 'white' ? '#2c3e50' : '#ffffff');
                 path.setAttribute('stroke-width', '2');
                 this.selectedPiece = null;
+                // Reset square colors
+                this.squares.forEach(square => {
+                    square.setAttribute('fill', (parseInt(square.dataset.row) + parseInt(square.dataset.col)) % 2 === 0 
+                        ? this.colors.light : this.colors.dark);
+                });
                 // Switch turns
                 this.currentTurn = this.currentTurn === 'white' ? 'black' : 'white';
             }
