@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pretty Chess</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="settings-panel">
+            <div class="setting">
+                <label for="pieceSize">Piece Size:</label>
+                <input type="range" id="pieceSize" min="0.9" max="4.5" step="0.1" value="0.9">
+                <span class="size-value">0.9x</span>
+            </div>
+            <button id="resetGame" class="reset-button">New Game</button>
+        </div>
+        <div class="board-container">
+            <svg id="chessboard" viewBox="-40 -40 880 880"></svg>
+        </div>
+    </div>
+    <script src="chess.js"></script>
+</body>
+</html>
