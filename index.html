@@ -40,6 +40,7 @@
                 <select id="gameType">
                     <option value="chess">Chess</option>
                     <option value="checkers">Checkers</option>
+                    <option value="backgammon">Backgammon</option>
                 </select>
             </label>
             <button id="resetGame">New Game</button>
@@ -53,6 +54,7 @@
     <script src="themes.js"></script>
     <script src="chess.js"></script>
     <script src="checkers.js"></script>
+    <script src="backgammon.js"></script>
     <script>
         let currentGame;
         
@@ -66,7 +68,7 @@
             }
             
             // Initialize new game
-            currentGame = gameType === 'checkers' ? new Checkers() : new Chess();
+            currentGame = gameType === 'checkers' ? new Checkers() : gameType === 'backgammon' ? new Backgammon() : new Chess();
         }
         
         window.addEventListener('load', () => {
