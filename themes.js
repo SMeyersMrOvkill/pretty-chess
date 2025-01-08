@@ -8,9 +8,9 @@ const themes = {
             shadow: '0 0 10px rgba(255, 255, 255, 0.5)'
         },
         validMove: {
-            base: 'rgba(255, 255, 255, 0.2)',
-            stroke: '#FFFFFF',
-            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+            base: 'rgba(255, 215, 0, 0.5)',
+            stroke: '#FFD700',
+            shadow: 'drop-shadow(0 0 4px #FFD700) drop-shadow(0 0 8px #DAA520)'
         },
         pieces: {
             white: '#FFFFFF',
@@ -28,9 +28,9 @@ const themes = {
             shadow: '0 0 10px rgba(0, 0, 0, 0.5)'
         },
         validMove: {
-            base: 'rgba(0, 0, 0, 0.15)',
-            stroke: '#000000',
-            shadow: '0 0 8px rgba(0, 0, 0, 0.3)'
+            base: 'rgba(255, 215, 0, 0.5)',
+            stroke: '#FFD700',
+            shadow: 'drop-shadow(0 0 4px #FFD700) drop-shadow(0 0 8px #DAA520)'
         },
         pieces: {
             white: '#FFFFFF',
@@ -48,9 +48,9 @@ const themes = {
             shadow: '0 0 10px rgba(255, 215, 0, 0.8)'
         },
         validMove: {
-            base: 'rgba(0, 255, 0, 0.2)',
-            stroke: '#00FF00',
-            shadow: '0 0 8px rgba(0, 255, 0, 0.6)'
+            base: 'rgba(255, 215, 0, 0.5)',
+            stroke: '#FFD700',
+            shadow: 'drop-shadow(0 0 4px #FFD700) drop-shadow(0 0 8px #DAA520)'
         },
         pieces: {
             white: '#FFFFFF',
@@ -68,9 +68,9 @@ const themes = {
             shadow: '0 0 10px rgba(255, 255, 255, 0.6)'
         },
         validMove: {
-            base: 'rgba(255, 255, 255, 0.15)',
-            stroke: '#FFFFFF',
-            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+            base: 'rgba(255, 215, 0, 0.5)',
+            stroke: '#FFD700',
+            shadow: 'drop-shadow(0 0 4px #FFD700) drop-shadow(0 0 8px #DAA520)'
         },
         pieces: {
             white: '#FFFFFF',
@@ -88,9 +88,9 @@ const themes = {
             shadow: '0 0 10px rgba(147, 112, 219, 0.6)'
         },
         validMove: {
-            base: 'rgba(255, 255, 255, 0.15)',
-            stroke: '#FFFFFF',
-            shadow: '0 0 8px rgba(255, 255, 255, 0.4)'
+            base: 'rgba(255, 215, 0, 0.5)',
+            stroke: '#FFD700',
+            shadow: 'drop-shadow(0 0 4px #FFD700) drop-shadow(0 0 8px #DAA520)'
         },
         pieces: {
             white: '#FFFFFF',

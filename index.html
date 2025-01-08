@@ -16,29 +16,121 @@
     
     <title>Pretty Chess - Beautiful SVG Chess Game</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        .settings-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .board-container {
+            width: 600px;
+            height: 600px;
+        }
+
+        .notification {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+
+        .notification.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .notification.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .notification .close-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 0 5px;
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+        .notification .close-btn:hover {
+            opacity: 1;
+        }
+
+        .notification.fade-out {
+            opacity: 0;
+        }
+
+        #notifications-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: none;
+            background-color: #2c3e50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #34495e;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+        }
+    </style>
 </head>
 <body>
+    <div id="notifications-container"></div>
     <div id="game-container" class="game-container">
         <div class="settings-panel">
-            <label>
-                Piece Size:
-                <input type="range" id="piece-size" min="0.7" max="1.5" step="0.1" value="1.2">
-                <span id="pieceSizeValue">1.2x</span>
-            </label>
             <label>
                 Theme:
                 <select id="theme-select">
                 </select>
             </label>
-            <label>
-                Game:
-                <select id="gameType">
-                    <option value="chess">Chess</option>
-                    <option value="checkers">Checkers</option>
-                    <option value="backgammon">Backgammon</option>
-                </select>
-            </label>
             <button id="resetGame">New Game</button>
+            <button id="exportGame">Export Game</button>
+            <label class="file-input-label">
+                <input type="file" id="loadGame" accept=".json" style="display: none;">
+                <button id="loadGameBtn">Load Game</button>
+            </label>
         </div>
         <div class="board-container">
             <svg id="chessboard" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
@@ -48,43 +140,135 @@
     </div>
     <script src="themes.js"></script>
     <script src="chess.js"></script>
-    <script src="checkers.js"></script>
-    <script src="backgammon.js"></script>
     <script>
         let currentGame;
         const gameContainer = document.getElementById('game-container');
         const themeSelect = document.getElementById('theme-select');
-        const gameSelect = document.getElementById('gameType');
-        const sizeSlider = document.getElementById('piece-size');
+        const boardContainer = document.querySelector('.board-container');
+        const exportButton = document.getElementById('exportGame');
+        const loadGameInput = document.getElementById('loadGame');
+        const loadGameBtn = document.getElementById('loadGameBtn');
+        const notificationsContainer = document.getElementById('notifications-container');
 
-        function initGame() {
-            if (gameContainer) gameContainer.innerHTML = '';
-            const gameType = gameSelect.value;
-            const theme = themes[themeSelect.value] || themes['Classic Dark']; // Provide a default theme
+        function showNotification(message, type = 'error', duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
             
-            if (gameType === 'checkers') {
-                currentGame = new Checkers(gameContainer, theme);
-            } else if (gameType === 'backgammon') {
-                currentGame = new Backgammon(gameContainer, theme);
-            } else {
-                currentGame = new Chess(gameContainer, theme);
+            const messageSpan = document.createElement('span');
+            messageSpan.textContent = message;
+            
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-btn';
+            closeButton.innerHTML = '×';
+            closeButton.onclick = () => {
+                notification.classList.add('fade-out');
+                setTimeout(() => notification.remove(), 300);
+            };
+            
+            notification.appendChild(messageSpan);
+            notification.appendChild(closeButton);
+            notificationsContainer.appendChild(notification);
+            
+            if (duration) {
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
             }
         }
 
-        // Wait for DOM content to be fully loaded
+        // Set default theme if not already set
+        const defaultTheme = 'Forest Green';
+        let currentTheme = themes[defaultTheme];
+
+        function initGame() {
+            const selectedThemeName = themeSelect.value || defaultTheme;
+            const selectedTheme = themes[selectedThemeName];
+            
+            if (!selectedTheme) {
+                console.error('Theme not found:', selectedThemeName);
+                return;
+            }
+            
+            // Clear previous game
+            if (boardContainer) {
+                boardContainer.innerHTML = '<svg id="chessboard" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet"></svg>';
+            }
+            
+            try {
+                currentGame = new Chess(boardContainer, selectedTheme);
+                
+                // Apply theme-specific background
+                document.body.style.backgroundColor = '#2c3e50';
+                
+            } catch (error) {
+                console.error('Failed to initialize game:', error);
+                boardContainer.innerHTML = '<div class="error-message">Sometimes things don\'t begin as we hoped. Try refreshing the page.</div>';
+            }
+        }
+
+        // Wait for everything to be ready
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize theme selector
-            Object.keys(themes).forEach(themeName => {
-                const option = document.createElement('option');
-                option.value = themeName;
-                option.textContent = themeName;
-                themeSelect.appendChild(option);
-            });
+            if (themeSelect) {
+                Object.keys(themes).forEach(themeName => {
+                    const option = document.createElement('option');
+                    option.value = themeName;
+                    option.textContent = themeName;
+                    if (themeName === defaultTheme) {
+                        option.selected = true;
+                    }
+                    themeSelect.appendChild(option);
+                });
+            }
 
             // Set up event listeners
-            themeSelect.addEventListener('change', initGame);
-            gameSelect.addEventListener('change', initGame);
-            document.getElementById('resetGame').addEventListener('click', initGame);
+            if (themeSelect) {
+                themeSelect.addEventListener('change', (e) => {
+                    const newTheme = themes[e.target.value];
+                    if (newTheme && currentGame && currentGame.updateTheme) {
+                        currentGame.updateTheme(newTheme);
+                    }
+                });
+            }
+            
+            if (document.getElementById('resetGame')) {
+                document.getElementById('resetGame').addEventListener('click', initGame);
+            }
+
+            if (exportButton) {
+                exportButton.addEventListener('click', () => {
+                    if (currentGame) {
+                        currentGame.downloadGameState();
+                    }
+                });
+            }
+
+            if (loadGameBtn && loadGameInput) {
+                loadGameBtn.addEventListener('click', () => {
+                    loadGameInput.click();
+                });
+
+                loadGameInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            if (currentGame && currentGame.loadFromJson(event.target.result)) {
+                                showNotification('Game loaded successfully!', 'success', 3000);
+                            } else {
+                                showNotification('Failed to load game. Please check if the file is valid.', 'error');
+                            }
+                        };
+                        reader.onerror = () => {
+                            showNotification('Error reading file. Please try again.', 'error');
+                        };
+                        reader.readAsText(file);
+                        // Reset file input so the same file can be loaded again
+                        e.target.value = '';
+                    }
+                });
+            }
 
             // Initial game setup
             initGame();
