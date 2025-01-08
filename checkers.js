@@ -1,35 +1,18 @@
 class Checkers {
-    constructor() {
-        this.board = document.getElementById('chessboard');
-        this.squares = [];
+    constructor(container, theme) {
+        this.container = container;
+        this.currentTheme = theme || themes['Classic Dark']; // Ensure we always have a theme
+        this.board = null;
         this.pieces = [];
         this.selectedPiece = null;
-        this.currentTheme = themes.forest; // Default theme for checkers
-        this.colors = { ...this.currentTheme };
-        this.pieceColors = {
-            red: '#e74c3c',
-            black: '#2c3e50'
-        };
-        this.currentTurn = 'red';
-        this.boardState = Array(8).fill().map(() => Array(8).fill(null));
-        this.pieceSize = 0.9;
+        this.currentPlayer = 'red';
         
-        // Create groups for board and pieces
-        this.boardGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        this.boardGroup.setAttribute('class', 'board-squares');
-        this.pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        this.pieceGroup.setAttribute('class', 'pieces');
-        
-        this.board.appendChild(this.boardGroup);
-        this.board.appendChild(this.pieceGroup);
-        
-        // Initialize the game
-        this.createBoard();
-        this.setupPieces();
-        this.initSettings();
-        
-        // Add click handler for the board
-        this.board.addEventListener('click', this.handleClick.bind(this));
+        // Initialize with grace
+        if (container) {
+            this.createBoard();
+            this.setupPieces();
+            this.setupEventListeners();
+        }
     }
 
     createBoard() {
@@ -49,7 +32,7 @@ class Checkers {
                 square.setAttribute('y', row * 100);
                 square.setAttribute('width', 100);
                 square.setAttribute('height', 100);
-                square.setAttribute('fill', isLight ? this.colors.light : this.colors.dark);
+                square.setAttribute('fill', isLight ? this.currentTheme.light : this.currentTheme.dark);
                 square.setAttribute('class', 'square');
                 square.dataset.row = row;
                 square.dataset.col = col;
@@ -109,52 +92,9 @@ class Checkers {
         this.boardState[row][col] = piece;
     }
 
-    initSettings() {
-        const themeSelect = document.getElementById('theme');
-        const pieceSize = document.getElementById('pieceSize');
-        const resetGame = document.getElementById('resetGame');
-
-        themeSelect.addEventListener('change', (e) => {
-            const selectedTheme = e.target.value;
-            if (themes[selectedTheme]) {
-                this.updateTheme(selectedTheme);
-            }
-        });
-
-        pieceSize.addEventListener('input', (e) => {
-            this.pieceSize = parseFloat(e.target.value);
-            this.updatePieceSizes();
-        });
-
-        resetGame.addEventListener('click', () => {
-            this.resetGame();
-        });
-    }
-
-    updateTheme(themeName) {
-        if (!themes[themeName]) return;
-        
-        this.currentTheme = themes[themeName];
-        this.colors = { ...this.currentTheme };
-        
-        document.body.style.backgroundColor = this.currentTheme.background;
-        
-        // Update square colors
-        this.squares.forEach((square, index) => {
-            const row = Math.floor(index / 8);
-            const col = index % 8;
-            const isLight = (row + col) % 2 === 0;
-            square.setAttribute('fill', isLight ? this.colors.light : this.colors.dark);
-        });
-    }
-
-    updatePieceSizes() {
-        this.pieces.forEach(piece => {
-            const circle = piece.querySelector('circle');
-            const row = parseInt(piece.dataset.row);
-            const col = parseInt(piece.dataset.col);
-            circle.setAttribute('r', 35 * this.pieceSize);
-        });
+    setupEventListeners() {
+        // Add click handler for the board
+        this.board.addEventListener('click', this.handleClick.bind(this));
     }
 
     isValidMove(piece, targetRow, targetCol) {
@@ -243,7 +183,7 @@ class Checkers {
             const pieceColor = piece.dataset.color;
             
             // Only allow selecting pieces of current turn
-            if (pieceColor === this.currentTurn) {
+            if (pieceColor === this.currentPlayer) {
                 if (this.selectedPiece) {
                     // Deselect currently selected piece
                     const circle = this.selectedPiece.querySelector('circle');
@@ -255,7 +195,7 @@ class Checkers {
                     // Select new piece
                     this.selectedPiece = piece;
                     const circle = piece.querySelector('circle');
-                    circle.setAttribute('stroke', this.colors.selected);
+                    circle.setAttribute('stroke', this.currentTheme.selected);
                     circle.setAttribute('stroke-width', '4');
                 } else {
                     // Deselect if clicking same piece
@@ -277,7 +217,7 @@ class Checkers {
                 circle.setAttribute('stroke-width', '3');
                 this.selectedPiece = null;
                 // Switch turns
-                this.currentTurn = this.currentTurn === 'red' ? 'black' : 'red';
+                this.currentPlayer = this.currentPlayer === 'red' ? 'black' : 'red';
             }
         }
     }
@@ -287,7 +227,7 @@ class Checkers {
         this.pieces.forEach(piece => piece.remove());
         this.pieces = [];
         this.selectedPiece = null;
-        this.currentTurn = 'red';
+        this.currentPlayer = 'red';
         this.boardState = Array(8).fill().map(() => Array(8).fill(null));
         
         // Reset board colors
@@ -295,6 +235,22 @@ class Checkers {
 
         // Setup new pieces
         this.setupPieces();
+    }
+
+    updateTheme(themeName) {
+        if (!themes[themeName]) return;
+        
+        this.currentTheme = themes[themeName];
+        
+        document.body.style.backgroundColor = this.currentTheme.background;
+        
+        // Update square colors
+        this.squares.forEach((square, index) => {
+            const row = Math.floor(index / 8);
+            const col = index % 8;
+            const isLight = (row + col) % 2 === 0;
+            square.setAttribute('fill', isLight ? this.currentTheme.light : this.currentTheme.dark);
+        });
     }
 }
 
